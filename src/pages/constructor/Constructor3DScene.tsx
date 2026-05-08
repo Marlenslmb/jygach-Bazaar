@@ -182,8 +182,8 @@ function DoorEl({ el, s }: { el: CanvasElement; s: ConstructorState }) {
       </mesh>
       {/* Кронштейны ручки */}
       {[-1, 1].map(side => (
-        <mesh key={side} position={[W*0.38, side*H*0.085, T/2 + 0.006]} castShadow>
-          <cylinderGeometry args={[0.004, 0.004, 0.012, 8]} rotation={[Math.PI/2, 0, 0]} />
+        <mesh key={side} position={[W*0.38, side*H*0.085, T/2 + 0.006]} rotation={[Math.PI/2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.004, 0.004, 0.012, 8]} />
           <meshStandardMaterial color={hc} roughness={0.20} metalness={0.75} />
         </mesh>
       ))}
