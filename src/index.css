@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(200, 101, 27, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(92, 107, 58, 0.04) 0%, transparent 40%);
+    overflow-x: hidden;
+  }
+
+  /* Paper grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.025 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.line');
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.ink-muted');
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3.5 bg-wood-dark text-paper rounded-full font-semibold text-sm transition-all hover:bg-amber-deep hover:-translate-y-0.5 hover:shadow-lift;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-6 py-3.5 bg-transparent text-ink border border-ink rounded-full font-semibold text-sm transition-all hover:bg-ink hover:text-paper;
+  }
+  .filter-chip {
+    @apply px-4 py-2 rounded-full bg-paper border border-line text-sm font-medium whitespace-nowrap transition-all hover:bg-bg-warm;
+  }
+  .filter-chip.active {
+    @apply bg-wood-dark text-paper border-wood-dark;
+  }
+  .card {
+    @apply bg-paper border border-line-soft rounded-2xl overflow-hidden transition-all;
+  }
+  .card-hover {
+    @apply hover:-translate-y-1 hover:shadow-lift;
+  }
+  .form-input {
+    @apply w-full bg-bg-warm border border-line rounded-lg px-3.5 py-2.5 text-[14px] font-medium transition-colors focus:outline-none focus:border-amber-deep focus:bg-paper;
+  }
+}

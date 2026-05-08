@@ -1,0 +1,154 @@
+/* Эти классы создают «фейковые» картинки на CSS.
+   Когда подключим реальные фото из Supabase Storage,
+   просто поменяем эти классы на <img> в карточках. */
+
+/* === Material visuals === */
+.mv-ldsp {
+  background: linear-gradient(180deg, #c8a571, #8b6f47);
+  position: relative;
+}
+.mv-ldsp::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 8px, rgba(0, 0, 0, 0.05) 8px 9px);
+}
+.mv-mdf { background: linear-gradient(135deg, #d4b896, #a08661); }
+.mv-furn { background: #2a1f17; position: relative; }
+.mv-furn::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px; height: 60px;
+  border: 4px solid #c8651b;
+  border-radius: 50%;
+}
+.mv-edge { background: linear-gradient(90deg, #6b4a2b 0 30%, #f5efe4 30% 70%, #6b4a2b 70%); }
+.mv-glass {
+  background: linear-gradient(135deg, #b8d4e3, #6e9eb8);
+  position: relative;
+}
+.mv-glass::after {
+  content: '';
+  position: absolute;
+  top: 20%; left: 20%;
+  width: 30%; height: 30%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  filter: blur(10px);
+}
+.mv-fabric {
+  background: repeating-linear-gradient(45deg, #9c4a0e, #9c4a0e 4px, #c8651b 4px, #c8651b 8px);
+}
+.mv-paint { background: linear-gradient(135deg, #5c6b3a, #8a9a5b); }
+.mv-handle { background: #faf6ec; position: relative; }
+.mv-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 20%; right: 20%;
+  height: 8px;
+  background: linear-gradient(90deg, #8b6f47, #c8a571);
+  border-radius: 4px;
+  transform: translateY(-50%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* === Portfolio visuals === */
+.vis-1 {
+  height: 320px;
+  background: linear-gradient(135deg, #6b4a2b 0%, #8b6f47 100%);
+  position: relative;
+}
+.vis-1::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border: 2px solid rgba(245, 239, 228, 0.4);
+  border-radius: 4px;
+  background: repeating-linear-gradient(90deg, transparent 0 30px, rgba(0, 0, 0, 0.1) 30px 31px);
+}
+.vis-2 {
+  height: 240px;
+  background: linear-gradient(160deg, #5c6b3a, #3d4a26);
+  position: relative;
+}
+.vis-2::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60%;
+  background: radial-gradient(ellipse at center top, rgba(255, 255, 255, 0.15), transparent 70%);
+}
+.vis-3 {
+  height: 380px;
+  background: linear-gradient(135deg, #c8a571, #e8d3a8);
+  position: relative;
+}
+.vis-3::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  background: #2a1f17;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px rgba(28, 22, 18, 0.1);
+}
+.vis-4 {
+  height: 280px;
+  background: #2a1f17;
+  position: relative;
+}
+.vis-4::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, transparent 0 20px, rgba(200, 101, 27, 0.3) 20px 22px);
+}
+.vis-5 {
+  height: 340px;
+  background: linear-gradient(180deg, #faf6ec 0%, #ede4d2 100%);
+  position: relative;
+}
+.vis-5::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border: 1px solid #6b4a2b;
+  background-image:
+    linear-gradient(#6b4a2b 1px, transparent 1px),
+    linear-gradient(90deg, #6b4a2b 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.4;
+}
+.vis-6 { height: 260px; background: linear-gradient(135deg, #9c4a0e, #c8651b); }
+.vis-7 {
+  height: 300px;
+  background: linear-gradient(180deg, #2a1f17, #6b4a2b);
+  position: relative;
+}
+.vis-7::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%; height: 70%;
+  background: linear-gradient(180deg, #c8a571 0%, #8b6f47 100%);
+  border-radius: 4px 4px 0 0;
+}
+.vis-8 { height: 220px; background: #ede4d2; position: relative; }
+.vis-8::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 30%, #c8651b 0, #c8651b 40px, transparent 41px),
+    radial-gradient(circle at 70% 70%, #5c6b3a 0, #5c6b3a 30px, transparent 31px);
+}
+
+/* Cover gradients for masters */
+.master-cover-1 { background: linear-gradient(135deg, #6b4a2b, #c8a571); }
+.master-cover-2 { background: linear-gradient(135deg, #5c6b3a, #8a9a5b); }
+.master-cover-3 { background: linear-gradient(135deg, #9c4a0e, #c8651b); }
+.master-cover-4 { background: linear-gradient(135deg, #2a1f17, #6b4a2b); }
+.master-cover-5 { background: linear-gradient(135deg, #b8d4e3, #6e9eb8); }
+.master-cover-6 { background: linear-gradient(135deg, #c8a571, #ede4d2); }
