@@ -1,25 +1,24 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { Star, CheckCircle2, MessageCircle, LayoutGrid, List } from 'lucide-react'
 import { mastersApi } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
-import { SectionHead } from '@/components/shared/SectionHead'
 import { cn } from '@/lib/utils'
 
 const filters = [
-  { id: 'all', label: 'Все мастера' },
-  { id: 'top', label: '★ Топ-рейтинг' },
-  { id: 'kitchen', label: 'Кухни' },
-  { id: 'wardrobe', label: 'Шкафы-купе' },
-  { id: 'bedroom', label: 'Спальни' },
-  { id: 'office', label: 'Офисная' },
-  { id: 'massive', label: 'Из массива' },
-  { id: 'bishkek', label: 'Бишкек' },
-  { id: 'osh', label: 'Ош' },
+  { id: 'all',      label: 'Все' },
+  { id: 'top',      label: '★ Топ' },
+  { id: 'bishkek',  label: 'Бишкек' },
+  { id: 'osh',      label: 'Ош' },
+  { id: 'kitchen',  label: 'Кухни' },
+  { id: 'wardrobe', label: 'Шкафы' },
+  { id: 'massive',  label: 'Массив' },
 ]
 
 export function MastersPage() {
-  const [active, setActive] = useState('all')
+  const [active, setActive]   = useState('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const showToast = useAppStore((s) => s.showToast)
 
   const { data: masters = [], isLoading } = useQuery({
@@ -27,133 +26,148 @@ export function MastersPage() {
     queryFn: () => mastersApi.list(),
   })
 
-  // Применяем простой клиентский фильтр
   const filtered = masters.filter((m) => {
-    if (active === 'all') return true
-    if (active === 'top') return m.rating >= 4.8
+    if (active === 'top')     return m.rating >= 4.8
     if (active === 'bishkek') return m.city === 'Бишкек'
-    if (active === 'osh') return m.city === 'Ош'
+    if (active === 'osh')     return m.city === 'Ош'
     return true
   })
 
   return (
     <div className="animate-page-in">
-      <SectionHead
-        title="Мастера"
-        emphasis="и студии"
-        description="Проверенные мебельщики Кыргызстана с портфолио и отзывами."
-      />
-
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-        {filters.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setActive(f.id)}
-            className={cn('filter-chip', active === f.id && 'active')}
-          >
-            {f.label}
-          </button>
-        ))}
+      {/* Заголовок */}
+      <div className="mb-5">
+        <h1 className="font-display text-3xl md:text-5xl font-semibold tracking-tight leading-none">
+          Мастера <em className="italic text-amber-deep font-medium">и студии</em>
+        </h1>
+        <p className="text-ink-muted text-sm md:text-base mt-2">
+          Проверенные мебельщики Кыргызстана
+        </p>
       </div>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="card h-[420px] animate-pulse" />
+      {/* Фильтры + переключатель вида */}
+      <div className="flex items-center gap-2 mb-5">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 flex-1 no-scrollbar">
+          {filters.map((f) => (
+            <button key={f.id} onClick={() => setActive(f.id)}
+              className={cn(
+                'px-3.5 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all shrink-0',
+                active === f.id
+                  ? 'bg-wood-dark text-paper'
+                  : 'bg-paper border border-line text-ink-soft hover:border-ink-muted'
+              )}>
+              {f.label}
+            </button>
           ))}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Переключатель вида */}
+        <div className="flex bg-bg-warm border border-line rounded-lg p-0.5 shrink-0">
+          <button onClick={() => setViewMode('grid')}
+            className={cn('w-8 h-8 rounded-md grid place-items-center transition-colors',
+              viewMode === 'grid' ? 'bg-paper shadow-sm text-ink' : 'text-ink-muted')}>
+            <LayoutGrid size={15} />
+          </button>
+          <button onClick={() => setViewMode('list')}
+            className={cn('w-8 h-8 rounded-md grid place-items-center transition-colors',
+              viewMode === 'list' ? 'bg-paper shadow-sm text-ink' : 'text-ink-muted')}>
+            <List size={15} />
+          </button>
+        </div>
+      </div>
+
+      {/* Счётчик */}
+      <div className="text-xs text-ink-muted mb-4">{filtered.length} мастеров</div>
+
+      {/* Скелетон */}
+      {isLoading && (
+        <div className={viewMode === 'grid'
+          ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'
+          : 'flex flex-col gap-2'}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className={cn('card animate-pulse bg-bg-warm',
+              viewMode === 'grid' ? 'h-48' : 'h-20')} />
+          ))}
+        </div>
+      )}
+
+      {/* GRID вид */}
+      {!isLoading && viewMode === 'grid' && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {filtered.map((m) => (
-            <article key={m.id} className="card card-hover">
-              <Link to={`/masters/${m.id}`} className="block">
-                <div className={`master-cover-${m.coverColor} h-[140px] relative`}>
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage:
-                        "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><path d='M0 20 L20 0 L40 20 L20 40 Z' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'/></svg>\")",
-                    }}
-                  />
-                  {m.verified && (
-                    <span className="absolute top-3 right-3 bg-paper px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 text-moss">
-                      ✓ Verified
-                    </span>
-                  )}
-                </div>
-                <div className="p-5 relative">
-                  <div className="absolute -top-8 left-5 w-16 h-16 rounded-full border-4 border-paper bg-wood-dark text-amber-soft grid place-items-center font-display text-[22px] font-bold">
+            <Link key={m.id} to={`/masters/${m.id}`}
+              className="card card-hover group overflow-hidden">
+              {/* Цветная полоска сверху */}
+              <div className={`master-cover-${m.coverColor} h-2`} />
+              <div className="p-3.5">
+                {/* Аватар + имя */}
+                <div className="flex items-center gap-2.5 mb-2.5">
+                  <div className="w-10 h-10 rounded-full bg-wood-dark text-amber-soft grid place-items-center font-display font-bold text-base shrink-0">
                     {m.initial}
                   </div>
-                  <h3 className="font-display text-[22px] font-semibold mt-8 mb-1 tracking-tight">
-                    {m.name}
-                  </h3>
-                  <div className="text-[13px] text-ink-muted mb-4">
-                    {m.specialization} • {m.city}
-                  </div>
-                  <div className="flex gap-4 py-3 border-y border-line-soft mb-4">
-                    <Stat num={m.rating.toFixed(1)} label="★ Рейтинг" amber />
-                    <Stat num={m.projectsCount.toString()} label="Проектов" />
-                    <Stat
-                      num={m.yearsExperience.toString()}
-                      label={pluralYears(m.yearsExperience)}
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {m.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="px-2.5 py-1 bg-bg-warm rounded-full text-[11px] font-medium"
-                      >
-                        {t}
-                      </span>
-                    ))}
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm leading-tight truncate">{m.name}</div>
+                    <div className="text-[11px] text-ink-muted truncate">{m.city}</div>
                   </div>
                 </div>
-              </Link>
-              <div className="flex gap-2 px-5 pb-5">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    showToast('Открываем чат...')
-                  }}
-                  className="flex-1 py-2.5 rounded-lg bg-wood-dark text-paper text-[13px] font-semibold transition-colors hover:bg-amber-deep"
-                >
-                  Написать
-                </button>
-                <Link
-                  to={`/masters/${m.id}`}
-                  className="flex-1 py-2.5 rounded-lg bg-transparent border border-ink text-[13px] font-semibold transition-colors hover:bg-ink hover:text-paper text-center"
-                >
-                  Профиль
-                </Link>
+                {/* Специализация */}
+                <div className="text-[11px] text-ink-muted mb-2.5 line-clamp-1">
+                  {m.specialization}
+                </div>
+                {/* Рейтинг + проекты */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <Star size={11} className="fill-amber text-amber" />
+                    <span className="text-xs font-bold">{m.rating.toFixed(1)}</span>
+                  </div>
+                  <div className="text-[11px] text-ink-muted">{m.projectsCount} проектов</div>
+                </div>
+                {/* Verified */}
+                {m.verified && (
+                  <div className="flex items-center gap-1 mt-1.5 text-moss text-[10px] font-semibold">
+                    <CheckCircle2 size={10} /> Проверен
+                  </div>
+                )}
               </div>
-            </article>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* LIST вид */}
+      {!isLoading && viewMode === 'list' && (
+        <div className="flex flex-col gap-2">
+          {filtered.map((m) => (
+            <Link key={m.id} to={`/masters/${m.id}`}
+              className="card card-hover flex items-center gap-3 p-3.5">
+              {/* Аватар */}
+              <div className={`w-12 h-12 rounded-xl bg-wood-dark text-amber-soft grid place-items-center font-display font-bold text-lg shrink-0 master-cover-${m.coverColor}`}>
+                <span className="text-paper">{m.initial}</span>
+              </div>
+              {/* Инфо */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm truncate">{m.name}</span>
+                  {m.verified && <CheckCircle2 size={13} className="text-moss shrink-0" />}
+                </div>
+                <div className="text-xs text-ink-muted truncate">{m.specialization} · {m.city}</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {m.tags.slice(0, 2).map(t => (
+                    <span key={t} className="text-[10px] bg-bg-warm px-2 py-0.5 rounded-full">{t}</span>
+                  ))}
+                </div>
+              </div>
+              {/* Рейтинг */}
+              <div className="text-right shrink-0">
+                <div className="flex items-center gap-1 justify-end">
+                  <Star size={12} className="fill-amber text-amber" />
+                  <span className="font-bold text-sm">{m.rating.toFixed(1)}</span>
+                </div>
+                <div className="text-[11px] text-ink-muted">{m.projectsCount} пр.</div>
+              </div>
+            </Link>
           ))}
         </div>
       )}
     </div>
   )
-}
-
-function Stat({ num, label, amber }: { num: string; label: string; amber?: boolean }) {
-  return (
-    <div className="flex-1">
-      <div
-        className={cn(
-          'font-display text-xl font-semibold leading-none',
-          amber && 'text-amber-deep'
-        )}
-      >
-        {num}
-      </div>
-      <div className="text-[11px] text-ink-muted mt-1">{label}</div>
-    </div>
-  )
-}
-
-function pluralYears(n: number): string {
-  if (n === 1) return 'Год'
-  if (n >= 2 && n <= 4) return 'Года'
-  return 'Лет'
 }

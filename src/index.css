@@ -64,3 +64,29 @@
     @apply w-full bg-bg-warm border border-line rounded-lg px-3.5 py-2.5 text-[14px] font-medium transition-colors focus:outline-none focus:border-amber-deep focus:bg-paper;
   }
 }
+
+/* ── Мобильная адаптация ── */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Убираем 300ms задержку тапа на мобиле */
+* { touch-action: manipulation; }
+
+/* Плавный скролл */
+html { scroll-behavior: smooth; }
+
+/* Карточки на мобиле — меньше отступы */
+@media (max-width: 640px) {
+  .card { border-radius: 1rem; }
+  .btn-primary, .btn-secondary { padding: 0.75rem 1.25rem; font-size: 0.875rem; }
+}
+
+/* Скрываем футер на мобиле (есть нижняя навигация) */
+@media (max-width: 768px) {
+  footer { display: none; }
+}
+
+/* Скрываем скроллбар но оставляем скролл */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

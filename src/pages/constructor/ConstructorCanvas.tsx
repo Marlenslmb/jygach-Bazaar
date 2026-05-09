@@ -105,25 +105,35 @@ export function ConstructorCanvas({ state, dispatch, svgRef, onDuplicate }: Prop
 
   const toMm = (px: number) => snap(px / scale2d)
 
-  // ——— Drag ———
-  const startDrag = useCallback((e: React.MouseEvent, el: CanvasElement, corner?: 'br'|'bl'|'tr'|'tl') => {
+  // ——— Drag (mouse + touch) ———
+  const getClientXY = (e: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e) {
+      const t = e.touches[0] || e.changedTouches[0]
+      return { clientX: t.clientX, clientY: t.clientY }
+    }
+    return { clientX: (e as React.MouseEvent).clientX, clientY: (e as React.MouseEvent).clientY }
+  }
+
+  const startDrag = useCallback((e: React.MouseEvent | React.TouchEvent, el: CanvasElement, corner?: 'br'|'bl'|'tr'|'tl') => {
     e.preventDefault(); e.stopPropagation()
     dispatch({ type: 'SELECT', id: el.id })
     setCtxMenu(null)
+    const { clientX, clientY } = getClientXY(e)
     setDrag({
       type: corner ? `resize-${corner}` as DragState['type'] : 'move',
       id: el.id,
-      startX: e.clientX, startY: e.clientY,
+      startX: clientX, startY: clientY,
       origX: el.x, origY: el.y,
       origW: el.w, origH: el.h,
-      snapshot: state.elements.map((e) => ({ ...e })),  // deep copy ДО начала drag
+      snapshot: state.elements.map((e) => ({ ...e })),
     })
   }, [dispatch, state.elements])
 
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
+  const onMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (!drag) return
-    const dx = toMm(e.clientX - drag.startX)
-    const dy = toMm(e.clientY - drag.startY)
+    const { clientX, clientY } = getClientXY(e)
+    const dx = toMm(clientX - drag.startX)
+    const dy = toMm(clientY - drag.startY)
 
     if (drag.type === 'move') {
       dispatch({ type: 'MOVE_ELEMENT_SILENT', id: drag.id, x: drag.origX + dx, y: drag.origY + dy })
@@ -309,10 +319,13 @@ export function ConstructorCanvas({ state, dispatch, svgRef, onDuplicate }: Prop
         backgroundImage: 'linear-gradient(rgba(107,93,79,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(107,93,79,0.055) 1px,transparent 1px)',
         backgroundSize: '20px 20px',
         cursor: drag?.type === 'move' ? 'grabbing' : 'default',
+        touchAction: 'none',
       }}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
+      onTouchMove={(e) => { e.preventDefault(); onMouseMove(e) }}
+      onTouchEnd={onMouseUp}
       onClick={() => { dispatch({ type: 'SELECT', id: null }); setCtxMenu(null) }}
     >
       <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${svgW} ${svgH}`} xmlns="http://www.w3.org/2000/svg" style={{ fontFamily: 'Manrope,sans-serif' }}>
@@ -358,8 +371,10 @@ export function ConstructorCanvas({ state, dispatch, svgRef, onDuplicate }: Prop
                 strokeWidth={isSel ? 2 : col.sw}
                 strokeDasharray={el.type === 'door' ? '5 3' : undefined}
                 cursor={draggable ? 'grab' : 'default'}
+                style={{ touchAction: 'none' }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => draggable && startDrag(e, el)}
+                onTouchStart={(e) => { if (draggable) { e.stopPropagation(); startDrag(e, el) } }}
                 onContextMenu={(e) => onCtxMenu(e, el)}
               />
 
@@ -433,6 +448,7 @@ export function ConstructorCanvas({ state, dispatch, svgRef, onDuplicate }: Prop
                       fill="#c8651b" stroke="white" strokeWidth={1.5}
                       cursor={cur}
                       onMouseDown={(e) => startDrag(e, el, c)}
+                      onTouchStart={(e) => { e.stopPropagation(); startDrag(e, el, c) }}
                       onClick={(e) => e.stopPropagation()}
                     />
                   )
