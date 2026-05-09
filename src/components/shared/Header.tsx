@@ -1,60 +1,73 @@
-import { NavLink, Link, useNavigate } from 'react-router-dom'
-import { Heart, MessageCircle, MapPin, PenSquare, LogIn, LogOut, User } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
-import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { useAppStore } from '@/store/useAppStore'
-import { messagesApi } from '@/api/client'
-import { cn } from '@/lib/utils'
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import {
+  Heart,
+  MessageCircle,
+  MapPin,
+  PenSquare,
+  LogIn,
+  LogOut,
+  User,
+} from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAppStore } from "@/store/useAppStore";
+import { messagesApi } from "@/api/client";
+import { cn } from "@/lib/utils";
 
 const navItems = [
-  { to: '/', label: 'Главная', end: true },
-  { to: '/materials', label: 'Материалы' },
-  { to: '/masters', label: 'Мастера' },
-  { to: '/orders', label: 'Заказы' },
-  { to: '/constructor', label: 'Конструктор' },
-]
+  { to: "/", label: "Главная", end: true },
+  { to: "/materials", label: "Материалы" },
+  { to: "/masters", label: "Мастера" },
+  { to: "/orders", label: "Заказы" },
+  { to: "/constructor", label: "Конструктор" },
+];
 
 const roleLabels = {
-  customer: 'Заказчик',
-  master: 'Мастер',
-  supplier: 'Поставщик',
-} as const
+  customer: "Заказчик",
+  master: "Мастер",
+  supplier: "Поставщик",
+} as const;
 
 export function Header() {
-  const { role, setRole, city } = useAppStore()
-  const navigate = useNavigate()
-  const [user, setUser] = useState<any>(null)
+  const { role, setRole, city } = useAppStore();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null)
-    })
-    return () => subscription.unsubscribe()
-  }, [])
+      setUser(session?.user ?? null);
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    navigate('/')
-  }
+    await supabase.auth.signOut();
+    setUser(null);
+    navigate("/");
+  };
 
   // Считаем непрочитанные сообщения
   const { data: threads = [] } = useQuery({
-    queryKey: ['threads'],
+    queryKey: ["threads"],
     queryFn: () => messagesApi.getThreads(),
     refetchInterval: 10000,
-  })
-  const unreadCount = threads.reduce((s, t) => s + t.unread, 0)
+  });
+  const unreadCount = threads.reduce((s, t) => s + t.unread, 0);
 
   return (
     <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur-xl border-b border-line">
       <div className="max-w-[1400px] mx-auto px-8 py-3.5 flex items-center gap-8 flex-wrap">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 font-display text-[22px] font-semibold tracking-tight">
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 font-display text-[22px] font-semibold tracking-tight"
+        >
           <div className="w-9 h-9 bg-wood-dark rounded-full grid place-items-center text-amber-soft font-display italic font-bold text-[18px]">
             J
           </div>
@@ -71,10 +84,10 @@ export function Header() {
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  'px-3.5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap',
+                  "px-3.5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap",
                   isActive
-                    ? 'bg-wood-dark text-paper'
-                    : 'text-ink-soft hover:bg-bg-warm hover:text-ink'
+                    ? "bg-wood-dark text-paper"
+                    : "text-ink-soft hover:bg-bg-warm hover:text-ink",
                 )
               }
             >
@@ -130,18 +143,24 @@ export function Header() {
               className="appearance-none bg-wood-dark text-paper text-[13px] font-semibold px-4 py-2 pr-8 rounded-full cursor-pointer hover:bg-amber-deep transition-colors"
             >
               {Object.entries(roleLabels).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
+                <option key={k} value={k}>
+                  {v}
+                </option>
               ))}
             </select>
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-paper pointer-events-none text-xs">▾</span>
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-paper pointer-events-none text-xs">
+              ▾
+            </span>
           </div>
 
           {/* Auth button */}
           {user ? (
             <div className="flex items-center gap-2">
-              <Link to="/profile"
+              <Link
+                to="/profile"
                 className="w-[38px] h-[38px] rounded-full bg-amber-soft border border-amber text-amber-deep grid place-items-center hover:bg-amber transition-colors"
-                title={user.email}>
+                title={user.email}
+              >
                 <User size={16} />
               </Link>
               <button
@@ -164,5 +183,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

@@ -14,6 +14,7 @@ import { NewOrderPage } from '@/pages/NewOrderPage'
 import { ConstructorPage } from '@/pages/ConstructorPage'
 import { MessagesPage } from '@/pages/MessagesPage'
 import { AuthPage } from '@/pages/AuthPage'
+import { ProfilePage } from '@/pages/ProfilePage'
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
                 <Route path="/messages" element={<MessagesPage />} />
                 <Route path="/messages/:id" element={<MessagesPage />} />
                 <Route path="/constructor" element={<ConstructorPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Routes>
             </main>
             <Footer />
