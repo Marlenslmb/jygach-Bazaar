@@ -5,6 +5,8 @@ export function ScrollToTop() {
   const { pathname } = useLocation()
 
   useEffect(() => {
+    // Чат управляет скроллом сам — не трогаем его
+    if (pathname.startsWith('/messages')) return
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [pathname])
 

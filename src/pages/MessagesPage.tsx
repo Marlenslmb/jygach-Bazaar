@@ -22,20 +22,21 @@ export function MessagesPage() {
   const [text, setText] = useState('')
   const [showAttachMenu, setShowAttachMenu] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const isFirstLoad = useRef(true)
+  const prevMessagesLength = useRef(0)
 
   // Список тредов
   const { data: threads = [] } = useQuery({
     queryKey: ['threads'],
     queryFn: () => messagesApi.getThreads(),
-    refetchInterval: 5000, // опрашиваем каждые 5 сек (в боевой — websocket)
+    refetchInterval: 5000,
   })
 
-  // Выбранный тред — берём первый если id не задан
   const currentThreadId = activeThreadId ?? threads[0]?.id
   const currentThread = threads.find((t) => t.id === currentThreadId)
 
-  // Сообщения активного треда
   const { data: messages = [] } = useQuery({
     queryKey: ['messages', currentThreadId],
     queryFn: () => messagesApi.getMessages(currentThreadId!),
@@ -43,7 +44,6 @@ export function MessagesPage() {
     refetchInterval: 3000,
   })
 
-  // Помечаем прочитанным при открытии
   useEffect(() => {
     if (currentThreadId) {
       messagesApi.markRead(currentThreadId).then(() => {
@@ -52,10 +52,45 @@ export function MessagesPage() {
     }
   }, [currentThreadId, qc])
 
-  // Скролл вниз при новых сообщениях
+  // Скролл к последнему сообщению:
+  // - Первая загрузка → мгновенно через scrollIntoView после rAF
+  // - Новое сообщение → плавно
+  // - НЕ скроллим window, только контейнер
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messages.length === 0) return
+
+    const isNewMessage = messages.length > prevMessagesLength.current
+    prevMessagesLength.current = messages.length
+
+    const scrollToBottom = (behavior: ScrollBehavior) => {
+      // rAF гарантирует что DOM уже отрисован
+      requestAnimationFrame(() => {
+        const end = messagesEndRef.current
+        const container = messagesContainerRef.current
+        if (!end || !container) return
+
+        if (behavior === 'instant') {
+          // Скроллим контейнер напрямую — без анимации window
+          container.scrollTop = container.scrollHeight
+        } else {
+          end.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+      })
+    }
+
+    if (isFirstLoad.current) {
+      scrollToBottom('instant')
+      isFirstLoad.current = false
+    } else if (isNewMessage) {
+      scrollToBottom('smooth')
+    }
   }, [messages])
+
+  // Сброс при смене треда
+  useEffect(() => {
+    isFirstLoad.current = true
+    prevMessagesLength.current = 0
+  }, [currentThreadId])
 
   // Отправка сообщения
   const sendMutation = useMutation({
@@ -232,7 +267,7 @@ export function MessagesPage() {
               </div>
 
               {/* Messages area */}
-              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-1">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-1">
                 {groupByDate(messages).map((group) => (
                   <div key={group.date}>
                     {/* Date separator */}

@@ -64,9 +64,9 @@ export function MasterDetailPage() {
       />
 
       {/* Hero / Cover */}
-      <section className="relative mb-20">
+      <section className="relative mb-6 md:mb-20">
         <div
-          className={`master-cover-${master.coverColor} h-56 md:h-64 rounded-2xl relative z-0 overflow-hidden`}
+          className={`master-cover-${master.coverColor} h-36 md:h-64 rounded-2xl relative z-0 overflow-hidden`}
         >
           <div
             className="absolute inset-0"
@@ -104,14 +104,14 @@ export function MasterDetailPage() {
         </div>
 
         {/* Avatar + main info card */}
-        <div className="relative z-10 -mt-16 mx-4 md:mx-8 bg-paper border border-line-soft rounded-2xl p-6 md:p-8 shadow-soft">
-          <div className="flex flex-col md:flex-row gap-6 md:items-end">
-            <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 border-paper bg-wood-dark text-amber-soft grid place-items-center font-display text-4xl font-bold shrink-0 -mt-16 shadow-soft">
+        <div className="relative z-10 -mt-10 md:-mt-16 mx-2 md:mx-8 bg-paper border border-line-soft rounded-2xl p-4 md:p-8 shadow-soft">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-6 md:items-end">
+            <div className="w-16 h-16 md:w-28 md:h-28 rounded-xl md:rounded-2xl border-4 border-paper bg-wood-dark text-amber-soft grid place-items-center font-display text-2xl md:text-4xl font-bold shrink-0 -mt-10 md:-mt-16 shadow-soft">
               {master.initial}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
+                <h1 className="font-display text-2xl md:text-4xl font-semibold tracking-tight">
                   {master.name}
                 </h1>
                 {master.verified && (
@@ -155,11 +155,11 @@ export function MasterDetailPage() {
       </section>
 
       {/* Content grid: main + sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 md:gap-8">
         {/* Main column */}
         <div className="space-y-12">
           {/* Stats row */}
-          <section className="grid grid-cols-3 gap-px bg-line border border-line rounded-2xl overflow-hidden">
+          <section className="grid grid-cols-3 gap-px bg-line border border-line rounded-xl md:rounded-2xl overflow-hidden">
             <StatCard
               num={master.rating.toFixed(1)}
               label="Рейтинг"
