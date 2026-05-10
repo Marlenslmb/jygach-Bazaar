@@ -9,6 +9,7 @@ import {
   MessageCircle,
 } from 'lucide-react'
 import { messagesApi } from '@/api/client'
+import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/store/useAppStore'
 import { cn, timeAgo } from '@/lib/utils'
 import type { ChatMessage } from '@/api/types'
@@ -41,8 +42,18 @@ export function MessagesPage() {
     queryKey: ['messages', currentThreadId],
     queryFn: () => messagesApi.getMessages(currentThreadId!),
     enabled: !!currentThreadId,
-    refetchInterval: 3000,
+    // Убрали polling — используем Realtime подписку ниже
   })
+
+  // Realtime подписка на новые сообщения
+  useEffect(() => {
+    if (!currentThreadId) return
+    const channel = messagesApi.subscribeToThread(currentThreadId, () => {
+      qc.invalidateQueries({ queryKey: ['messages', currentThreadId] })
+      qc.invalidateQueries({ queryKey: ['threads'] })
+    })
+    return () => { supabase.removeChannel(channel) }
+  }, [currentThreadId, qc])
 
   useEffect(() => {
     if (currentThreadId) {

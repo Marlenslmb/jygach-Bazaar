@@ -19,6 +19,7 @@ import {
   MapPin,
 } from 'lucide-react'
 import { ordersApi } from '@/api/client'
+import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/store/useAppStore'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 import { cn, formatShortPrice } from '@/lib/utils'
@@ -151,15 +152,20 @@ export function NewOrderPage() {
         district: form.district || undefined,
         budget: form.budget,
         deadlineWeeks: form.deadlineWeeks,
-        customerId: 'cust-me',
-        customerName: 'Вы',
-        customerInitial: 'В',
         requirements: form.requirements,
         preferredMaterials: form.preferredMaterials,
       }),
     onSuccess: (order) => {
       showToast('Заявка опубликована! Ждите откликов.')
       navigate(`/orders/${order.id}`)
+    },
+    onError: (err: any) => {
+      if (err?.message?.includes('авторизован')) {
+        showToast('Войдите чтобы опубликовать заказ')
+        navigate('/auth')
+      } else {
+        showToast('Ошибка публикации. Попробуйте ещё раз.')
+      }
     },
   })
 

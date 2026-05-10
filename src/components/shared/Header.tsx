@@ -42,11 +42,29 @@ export function Header() {
   }, [menuOpen])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+        if (data?.role) setRole(data.role)
+      }
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+        if (data?.role) setRole(data.role)
+      } else {
+        setRole('customer')
+      }
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -108,13 +126,17 @@ export function Header() {
                 </span>
               )}
             </Link>
-            <div className="relative">
-              <select value={role} onChange={(e) => setRole(e.target.value as typeof role)}
-                className="appearance-none bg-wood-dark text-paper text-[13px] font-semibold px-4 py-2 pr-8 rounded-full cursor-pointer hover:bg-amber-deep transition-colors">
-                {Object.entries(roleLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-paper pointer-events-none text-xs">▾</span>
-            </div>
+            {/* Бейдж роли — только показываем, не меняем */}
+            {user && (
+              <div className={cn(
+                'px-3 py-1.5 rounded-full text-[13px] font-semibold',
+                role === 'master' ? 'bg-amber-soft text-amber-deep' :
+                role === 'supplier' ? 'bg-[#e6f0d8] text-[#4a5a2a]' :
+                'bg-bg-warm text-ink-soft border border-line'
+              )}>
+                {roleLabels[role]}
+              </div>
+            )}
             {user ? (
               <div className="flex items-center gap-2">
                 <Link to="/profile"
@@ -204,23 +226,20 @@ export function Header() {
 
             <div className="h-px bg-line mx-4" />
 
-            {/* Роль */}
-            <div className="p-4">
-              <div className="text-xs font-bold uppercase tracking-wider text-ink-muted mb-2 px-1">
-                Я — {roleLabels[role]}
+            {/* Бейдж роли */}
+            {user && (
+              <div className="px-4 py-2">
+                <div className={cn(
+                  'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold',
+                  role === 'master' ? 'bg-amber-soft text-amber-deep' :
+                  role === 'supplier' ? 'bg-[#e6f0d8] text-[#4a5a2a]' :
+                  'bg-bg-warm text-ink-soft'
+                )}>
+                  {role === 'master' ? '👨‍🔧' : role === 'supplier' ? '📦' : '🛒'}
+                  {roleLabels[role]}
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                {(Object.entries(roleLabels) as [keyof typeof roleLabels, string][]).map(([k, v]) => (
-                  <button key={k} onClick={() => setRole(k)}
-                    className={cn(
-                      'py-2.5 rounded-xl text-sm font-semibold transition-all',
-                      role === k ? 'bg-wood-dark text-paper' : 'bg-bg-warm text-ink-soft'
-                    )}>
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
 
             <div className="h-px bg-line mx-4" />
 
