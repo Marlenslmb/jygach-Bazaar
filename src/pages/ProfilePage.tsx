@@ -20,20 +20,27 @@ function useProfile() {
   return useQuery({
     queryKey: ['my-profile'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return null
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-      if (error) {
-        console.error('useProfile error:', error)
-        return null
-      }
-      return data
+      // Таймаут 5 секунд — если Supabase не ответил, возвращаем null
+      const timeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 5000))
+
+      const profilePromise = (async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.user) return null
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        if (error) {
+          console.error('useProfile error:', error)
+          return null
+        }
+        return data
+      })()
+
+      return Promise.race([profilePromise, timeout])
     },
-    retry: 1,
+    retry: false,
     staleTime: 30_000,
   })
 }
