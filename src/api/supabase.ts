@@ -68,7 +68,7 @@ export const supabaseMastersApi = {
     }
   },
 
-  async getPortfolio(masterId: string) {
+  async getPortfolio(masterId?: string) {
     if (!masterId) return [];
     const { data } = await supabase
       .from("portfolio_items")
